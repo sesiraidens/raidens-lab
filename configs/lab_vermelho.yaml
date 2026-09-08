@@ -1,0 +1,4 @@
+color: vermelho
+color_space: LAB
+lower: [20, 150, 100]
+upper: [255, 255, 200]
