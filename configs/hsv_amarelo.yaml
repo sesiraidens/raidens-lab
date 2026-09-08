@@ -1,0 +1,4 @@
+color: amarelo
+color_space: HSV
+lower: [20, 100, 100]
+upper: [35, 255, 255]
