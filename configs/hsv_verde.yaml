@@ -1,0 +1,4 @@
+color: verde
+color_space: HSV
+lower: [35, 100, 100]
+upper: [85, 255, 255]
