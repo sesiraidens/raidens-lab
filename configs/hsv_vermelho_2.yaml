@@ -1,0 +1,4 @@
+color: vermelho_2
+color_space: HSV
+lower: [170, 120, 70]
+upper: [179, 255, 255]
