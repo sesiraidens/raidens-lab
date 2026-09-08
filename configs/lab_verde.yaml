@@ -1,0 +1,4 @@
+color: verde
+color_space: LAB
+lower: [30, 50, 50]
+upper: [200, 128, 200]
