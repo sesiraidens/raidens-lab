@@ -1,0 +1,4 @@
+color: azul
+color_space: HSV
+lower: [100, 100, 100]
+upper: [130, 255, 255]
