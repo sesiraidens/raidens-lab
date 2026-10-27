@@ -213,3 +213,4 @@ def print_validation_report(results):
         print(f"         Cor: {r['color']} | Pixels: {r['percentage']:.1f}%")
         
     print("\n" + "=" * 60)
+
