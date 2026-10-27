@@ -294,3 +294,4 @@ if __name__ == "__main__":
     calibrator = LABCalibrator(camera_index=args.camera)
     calibrator.set_color_name(args.color)
     calibrator.run()
+
