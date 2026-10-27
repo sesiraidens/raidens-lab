@@ -195,3 +195,4 @@ if __name__ == "__main__":
     tester = CameraTester(camera_index=args.camera)
     tester.load_all_ranges(args.config_dir)
     tester.run()
+
