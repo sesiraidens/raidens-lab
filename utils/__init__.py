@@ -29,3 +29,4 @@ __all__ = [
     "auto_calibrate_hsv", "auto_calibrate_lab",
     "auto_calibrate_interactive", "find_dominant_colors"
 ]
+
