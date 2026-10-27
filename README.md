@@ -1,15 +1,17 @@
 <div align="center">
 
-<img src="https://sesiraidens.github.io/portifolio/assets/logo_color-aNRVU26Y.png" width="80">
+<img src="https://sesiraidens.github.io/portifolio/assets/logo_color-aNRVU26Y.png" alt="Logo RAIDENS" width="140">
 
 # raidens-lab
 
-Ferramentas de calibracao de cores nos espacos LAB e HSV para visao computacional.
+**Calibração de cores em HSV e LAB para visão computacional confiável em qualquer iluminação**
 
-![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)
-![OpenCV](https://img.shields.io/badge/OpenCV-5C3EE8?style=flat&logo=opencv&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-d9333b?style=flat)
-![Status](https://img.shields.io/badge/Status-Active-2ea043?style=flat)
+![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white)
+![OpenCV](https://img.shields.io/badge/OpenCV-4.x-5C3EE8?style=flat-square&logo=opencv&logoColor=white)
+![YAML](https://img.shields.io/badge/Configs-YAML-CB171E?style=flat-square&logo=yaml&logoColor=white)
+![Licença MIT](https://img.shields.io/badge/Licen%C3%A7a-MIT-D9333B?style=flat-square)
+
+[Sobre](#sobre) · [Instalação](#instalação) · [Início rápido](#início-rápido) · [Ferramentas](#ferramentas) · [Dicas](#dicas-de-calibração)
 
 </div>
 
@@ -17,253 +19,151 @@ Ferramentas de calibracao de cores nos espacos LAB e HSV para visao computaciona
 
 ## Sobre
 
-O **raidens-lab** reune ferramentas para calibracao de cores utilizadas em projetos de visao computacional da equipe RAIDENS. A calibracao e essencial para que o robo identifique cores de forma confiavel em diferentes condicoes de iluminacao.
+Uma cor que o robô reconhece perfeitamente no laboratório pode sumir na arena da competição. Iluminação, ângulo da câmera, sombras e reflexos mudam os valores que a câmera enxerga. O **raidens-lab** existe para resolver isso: ele ajuda a encontrar os ranges certos *no local da prova* e os salva em YAML para que o código do robô só precise carregá-los.
 
-### Por que calibrar?
+### HSV ou LAB?
 
-Sensores de cor (TCS3200, TCS34725) e cameras dependem de ranges de cor para identificar objetos. Esses ranges variam conforme:
-- Iluminacao do ambiente (interna vs externa)
-- Angulo da camera em relacao ao objeto
-- Cor do objeto (tons diferentes de vermelho)
-- Presenca de sombras ou reflexos
+| Espaço | Quando usar |
+|---|---|
+| **HSV** | Ambientes com luz estável. É intuitivo de ajustar pelo matiz (H). |
+| **LAB** | Ambientes com sombras ou luz variável. Separa a luminosidade (L) da cor (A e B), então é mais robusto. |
 
-O raidens-lab oferece ferramentas interativas para encontrar ranges otimos e salva-los em formato YAML para reutilizacao.
+## Instalação
 
----
+```bash
+git clone https://github.com/sesiraidens/raidens-lab.git
+cd raidens-lab
+pip install "opencv-python>=4.5" "numpy>=1.19" "pyyaml>=5.0"
+```
 
-## Estrutura
+## Início rápido
 
-`
-raidens-lab/
-├── calibrators/
-│   ├── hsv_calibrator.py      # Calibrador interativo HSV
-│   ├── lab_calibrator.py      # Calibrador interativo LAB
-│   ├── camera_tester.py       # Teste de ranges em tempo real
-│   └── __init__.py
-├── utils/
-│   ├── color_converter.py     # Conversao RGB/HSV/LAB
-│   ├── range_generator.py     # Gerador de ranges YAML
-│   ├── range_validator.py     # Validador de ranges
-│   ├── auto_calibrator.py     # Calibracao automatica
-│   └── __init__.py
-├── configs/
-│   ├── hsv_vermelho.yaml      # Range HSV vermelho
-│   ├── hsv_vermelho_2.yaml    # Range HSV vermelho (faixa alta)
-│   ├── hsv_verde.yaml         # Range HSV verde
-│   ├── hsv_azul.yaml          # Range HSV azul
-│   ├── hsv_amarelo.yaml       # Range HSV amarelo
-│   ├── lab_vermelho.yaml      # Range LAB vermelho
-│   └── lab_verde.yaml         # Range LAB verde
-├── examples/
-│   ├── calibrar_cor.py        # Exemplo de calibracao
-│   ├── testar_range.py        # Exemplo de teste
-│   └── comparar_iluminacao.py # Teste de robustez
-└── README.md
-`
+**1. Calibre a cor com a câmera**
 
----
-
-## Modulos
-
-### calibrators/hsv_calibrator.py
-
-Calibrador interativo de cores no espaco HSV.
-
-**Como funciona:**
-1. Abre janela com captura de camera em tempo real
-2. Exibe seis trackbars (H_min, H_max, S_min, S_max, V_min, V_max)
-3. Usuario ajusta ate a mascara cobrir apenas a cor desejada
-4. Pressiona S para salvar em YAML
-
-**Controles:**
-- S: Salvar range atual
-- R: Resetar trackbars
-- Q: Sair
-
-**Uso via terminal:**
-`ash
+```bash
 python calibrators/hsv_calibrator.py --camera 0 --color vermelho
-`
+```
 
-**Uso como modulo:**
-`python
+Ajuste as seis barras (H, S e V mínimos e máximos) até a máscara mostrar só a cor desejada.
+
+| Tecla | Ação |
+|---|---|
+| `S` | Salvar o range em `configs/` |
+| `R` | Resetar as barras |
+| `Q` | Sair |
+
+**2. Teste o range em tempo real**
+
+```bash
+python examples/testar_range.py --config configs/hsv_verde.yaml --camera 0 --duration 10
+```
+
+**3. Verifique a robustez a mudanças de luz**
+
+```bash
+python examples/comparar_iluminacao.py --image foto.jpg --config configs/hsv_vermelho.yaml
+```
+
+## Ferramentas
+
+### Calibradores interativos
+
+| Classe | O que faz |
+|---|---|
+| `HSVCalibrator` | Barras deslizantes em HSV sobre a imagem da câmera |
+| `LABCalibrator` | O mesmo fluxo no espaço LAB |
+| `CameraTester` | Carrega todos os YAML de `configs/` e mostra contornos, centróides e percentual detectado de cada cor |
+
+```python
 from calibrators.hsv_calibrator import HSVCalibrator
-
-calibrator = HSVCalibrator(camera_index=0)
-calibrator.set_color_name("verde")
-calibrator.run()
-`
-
-### calibrators/lab_calibrator.py
-
-Calibrador interativo no espaco LAB.
-
-**Vantagem do LAB sobre HSV:**
-- LAB separa luminancia (L) de crominancia (A, B)
-- Mais robusto a variacoes de iluminacao
-- Melhor para ambientes com sombras
-
-**Uso:**
-`python
-from calibrators.lab_calibrator import LABCalibrator
-
-calibrator = LABCalibrator()
-calibrator.set_color_name("vermelho")
-calibrator.run()
-`
-
-### calibrators/camera_tester.py
-
-Teste de ranges em tempo real.
-
-**Funcionalidades:**
-- Carrega multiplos ranges de diretorio configs/
-- Exibe deteccao de cores com contornos e centroides
-- Mostra percentual de pixels detectados por cor
-
-**Uso:**
-`python
 from calibrators.camera_tester import CameraTester
+
+calibrador = HSVCalibrator(camera_index=0)
+calibrador.set_color_name("verde")
+calibrador.run()
 
 tester = CameraTester(camera_index=0)
 tester.load_all_ranges("configs")
 tester.run()
-`
+```
 
-### utils/color_converter.py
+### Utilitários
 
-Conversao entre espacos de cor e funcoes auxiliares.
+| Módulo | Funções |
+|---|---|
+| `utils/color_converter.py` | Conversões entre RGB, HSV, LAB e hexadecimal; `get_color_name`, `compare_colors`, `filter_image_by_color` |
+| `utils/range_generator.py` | `generate_yaml`, `generate_multi_range_yaml`, `merge_ranges`, `load_range`, `list_ranges` |
+| `utils/range_validator.py` | `validate_range`, `validate_range_from_file`, `test_range_on_camera`, `batch_validate`, `print_validation_report` |
+| `utils/auto_calibrator.py` | `auto_calibrate_hsv` e `auto_calibrate_lab` a partir de um clique, `auto_calibrate_interactive`, `find_dominant_colors` (k-means) |
 
-**Funcoes principais:**
-- gb_to_hsv(r, g, b) - Converte RGB para HSV
-- gb_to_lab(r, g, b) - Converte RGB para LAB
-- hsv_to_rgb(h, s, v) - Converte HSV para RGB
-- hex_to_rgb(hex_color) - Converte hexadecimal para RGB
-- get_color_name(h, s, v) - Retorna nome aproximado da cor
-- get_color_ranges() - Retorna ranges pre-definidos para cores comuns
-- compare_colors(c1, c2) - Calcula distancia entre duas cores
-- ilter_image_by_color(image, lower, upper) - Filtra imagem por cor
+### Faixas de valores no OpenCV
 
-**Faixas de valores:**
-
-| Espaco | Canal | Min | Max |
-|---|---|---|---|
-| HSV | H (Hue) | 0 | 179 |
-| HSV | S (Saturation) | 0 | 255 |
-| HSV | V (Value) | 0 | 255 |
-| LAB | L (Lightness) | 0 | 255 |
-| LAB | A (Green-Red) | 0 | 255 |
-| LAB | B (Blue-Yellow) | 0 | 255 |
-
-### utils/range_generator.py
-
-Gerador de arquivos YAML com ranges de cor.
-
-**Funcoes:**
-- generate_yaml(color_name, lower, upper) - Gera arquivo YAML
-- generate_multi_range_yaml(color_name, ranges) - Gera com multiplos ranges
-- merge_ranges(range1, range2) - Combina dois ranges
-- load_range(filepath) - Carrega range de arquivo
-- list_ranges(config_dir) - Lista ranges disponiveis
-
-### utils/range_validator.py
-
-Validador de ranges contra imagens e camera.
-
-**Funcoes:**
-- alidate_range(image, lower, upper) - Valida range contra imagem
-- alidate_range_from_file(image_path, range_path) - Valida a partir de arquivos
-- 	est_range_on_camera(range_path) - Testa em tempo real
-- atch_validate(image_dir, config_dir) - Valida multiplos ranges
-- print_validation_report(results) - Imprime relatorio
-
-### utils/auto_calibrator.py
-
-Calibracao automatica por amostragem de pixels.
-
-**Funcoes:**
-- uto_calibrate_hsv(image_path, click_point) - Calibracao HSV automatica
-- uto_calibrate_lab(image_path, click_point) - Calibracao LAB automatica
-- uto_calibrate_interactive(image_path) - Calibracao com multiplos cliques
-- ind_dominant_colors(image_path, n_colors) - Encontra cores dominantes via kmeans
-
----
-
-## Dependencias
-
-`
-opencv-python>=4.5.0
-numpy>=1.19.0
-pyyaml>=5.0
-`
-
-**Instalacao:**
-`ash
-pip install opencv-python numpy pyyaml
-`
-
----
-
-## Como Usar
-
-### Calibracao basica
-
-1. Rode o calibrador HSV:
-`ash
-python calibrators/hsv_calibrator.py --color vermelho
-`
-
-2. Ajuste as trackbars para isolar a cor desejada
-3. Pressione S para salvar
-4. O arquivo YAML sera gerado em configs/
-
-### Teste de range
-
-1. Rode o testador:
-`ash
-python examples/testar_range.py --config configs/hsv_verde.yaml
-`
-
-2. Aponte a camera para o objeto
-3. Verifique o percentual de deteccao
-
-### Comparacao de iluminacao
-
-1. Rode o comparador:
-`ash
-python examples/comparar_iluminacao.py --image foto.jpg --config configs/hsv_vermelho.yaml
-`
-
-2. Verifique se o range funciona em diferentes niveis de brilho
-
----
-
-## Configs Pre-Definidos
-
-| Arquivo | Cor | Espaco |
+| Espaço | Canal | Faixa |
 |---|---|---|
-| hsv_vermelho.yaml | Vermelho | HSV (0-10) |
-| hsv_vermelho_2.yaml | Vermelho | HSV (170-179) |
-| hsv_verde.yaml | Verde | HSV (35-85) |
-| hsv_azul.yaml | Azul | HSV (100-130) |
-| hsv_amarelo.yaml | Amarelo | HSV (20-35) |
-| lab_vermelho.yaml | Vermelho | LAB |
-| lab_verde.yaml | Verde | LAB |
+| HSV | H (matiz) | 0 a 179 |
+| HSV | S (saturação) e V (valor) | 0 a 255 |
+| LAB | L (luminosidade), A (verde ↔ vermelho) e B (azul ↔ amarelo) | 0 a 255 |
+
+## Ranges pré-definidos
+
+| Arquivo | Cor | Espaço |
+|---|---|---|
+| `hsv_vermelho.yaml` | Vermelho | HSV, faixa baixa (0 a 10) |
+| `hsv_vermelho_2.yaml` | Vermelho | HSV, faixa alta (170 a 179) |
+| `hsv_verde.yaml` | Verde | HSV (35 a 85) |
+| `hsv_azul.yaml` | Azul | HSV (100 a 130) |
+| `hsv_amarelo.yaml` | Amarelo | HSV (20 a 35) |
+| `lab_vermelho.yaml` | Vermelho | LAB |
+| `lab_verde.yaml` | Verde | LAB |
+
+## Dicas de calibração
+
+1. **Calibre onde vai competir.** A luz da arena raramente é igual à do laboratório.
+2. **Mantenha o ângulo da câmera** igual na calibração e no uso.
+3. **Deixe margem.** Cerca de dois desvios-padrão em torno da média cobre as variações normais.
+4. **O vermelho precisa de dois ranges em HSV**, porque o matiz "dá a volta" entre 179 e 0.
+5. **Muita sombra? Prefira LAB.**
+
+## Estrutura
+
+```text
+raidens-lab/
+├── calibrators/   # Ferramentas interativas com câmera
+├── utils/         # Conversão, geração, validação e calibração automática
+├── configs/       # Ranges prontos em YAML
+└── examples/      # Scripts de linha de comando
+```
+
+## Ecossistema RAIDENS
+
+Este repositório faz parte de um conjunto de bibliotecas da equipe. Elas usam os mesmos nomes de classes e convenções, então o que você aprende em uma serve nas outras.
+
+| Repositório | Para quê |
+|---|---|
+| [`raidens-python`](https://github.com/sesiraidens/raidens-python) | Biblioteca principal em Python: sensores, motores e robôs prontos (seguidor, parede, resgate) |
+| [`raidens-arduino`](https://github.com/sesiraidens/raidens-arduino) | As mesmas abstrações em C++ para rodar direto no Arduino |
+| [`raidens-sensores`](https://github.com/sesiraidens/raidens-sensores) | Catálogo completo de sensores com calibração e filtragem |
+| [`raidens-motores`](https://github.com/sesiraidens/raidens-motores) | Motores DC, servo, passo, driver L298N e rodas mecanum |
+| [`raidens-pid`](https://github.com/sesiraidens/raidens-pid) | Controladores PID, PID avançado, cascata e sintonia Ziegler-Nichols |
+| [`raidens-opencv`](https://github.com/sesiraidens/raidens-opencv) | Visão computacional: cores, linhas e navegação por câmera |
+| [`raidens-obr`](https://github.com/sesiraidens/raidens-obr) | Robô completo para a OBR, integrando sensores, motores e missões |
+| [`raidens-electronics`](https://github.com/sesiraidens/raidens-electronics) | Cálculos e modelos de componentes eletrônicos |
+| [`raidens-3d`](https://github.com/sesiraidens/raidens-3d) | Peças 3D paramétricas geradas em OpenSCAD |
+| [`raidens-ros`](https://github.com/sesiraidens/raidens-ros) | Estrutura de nodes e tópicos ROS 2 |
+| [`raidens-snippets`](https://github.com/sesiraidens/raidens-snippets) | Trechos de código prontos para copiar e colar |
 
 ---
 
-## Dicas de Calibracao
+<div align="center">
 
-1. **Iluminacao constante:** Calibre na mesma iluminacao que usara na competicao
-2. **Angulo consistente:** Mantenha a camera no mesmo angulo durante calibracao e uso
-3. **Margem de seguranca:** Use margem de 2 desvios padrao para cobrir variacoes
-4. **Vermelho em HSV:** Precisa de dois ranges (0-10 e 170-179) por causa da divisao do Hue
-5. **LAB para sombras:** Se o ambiente tem muitas sombras, prefira LAB
+<img src="https://sesiraidens.github.io/portifolio/assets/logo_color-aNRVU26Y.png" alt="Logo RAIDENS" width="56">
 
----
+**Equipe RAIDENS** · SESI 192 Alumínio/SP
 
-## Equipe
+[![Email](https://img.shields.io/badge/Email-sesiraidens%40gmail.com-D14836?style=flat-square&logo=gmail&logoColor=white)](mailto:sesiraidens@gmail.com)
+[![Linktree](https://img.shields.io/badge/Linktree-sesiraidens-39E06B?style=flat-square&logo=linktree&logoColor=white)](https://linktr.ee/sesiraidens)
+[![GitHub](https://img.shields.io/badge/GitHub-sesiraidens-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/sesiraidens)
 
-**RAIDENS - SESI Aluminio 192**
+<sub>Desenvolvido pela equipe RAIDENS para fins educacionais. Licenciado sob MIT.</sub>
 
-Desenvolvido para uso interno da equipe. Licenciado sob MIT.
+</div>
